@@ -21,77 +21,113 @@ const textInput = document.querySelector("#text");
 const saveNoteBtn = document.querySelector("#saveNoteBtn");
 const discardNote = document.querySelector("#discardNoteBtn");
 
-var db;
+const cardData = [
+  {
+    title: "Bill",
+    text: "bill@company.com",
+  },
+  {
+    title: "Donna",
+    text: "donna@home.org",
+  },
+];
+// opening Database
+async function getDataBase() {
+  const db = await openDB();
+  return db;
+}
 
-const requestOpeningNotesDatabase = indexedDB.open("notesDatabase", 1);
+openDB();
 
-requestOpeningNotesDatabase.onerror = (e) => {
-  console.log(`Error opening database ${e.target.error}`);
-};
-requestOpeningNotesDatabase.onsuccess = (e) => {
-  console.log(`database "${e.target.result.name}" opened successfully`);
-};
-requestOpeningNotesDatabase.onupgradeneeded = (e) => {
-  console.log(`onupgradeneeded event called on "${e.target.result.name}`);
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = window.indexedDB.open("MyTestDatabase", 1);
 
-  db = e.target.result;
-  db.onerror = (e) => {
-    console.log(`DataBase error !! ${e.target.errorCode}`);
-  };
+    request.onerror = (event) => {
+      reject(event.target.error);
+      console.log("error");
+    };
 
-  const objectStore = db.createObjectStore("notes", { keyPath: "id" });
-  objectStore.createIndex("title", "title", { unique: true });
-  objectStore.createIndex("text", "text", { unique: true });
-};
+    request.onsuccess = (event) => {
+      resolve(event.target.result);
+      console.log(`success`);
+    };
 
-//
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      console.log(`upgradeneeded`);
 
-saveNoteBtn.addEventListener("click", saveNote);
+      const objectStore = db.createObjectStore("cards", {
+        autoIncrement: true,
+      });
+      objectStore.createIndex("text", "text", {
+        unique: true,
+      });
+      objectStore.createIndex("title", "title", {
+        unique: true,
+      });
 
-const idGenerator = onetime();
+      objectStore.transaction.oncomplete = (event) => {
+        console.log(`transaction complete`);
+      };
+    };
+  });
+}
 
-//// add data
+async function addData(objData) {
+  const db = await getDataBase();
+  const txn = db.transaction("cards", "readwrite");
+  const objectStore = txn.objectStore("cards");
 
-function addData(note) {
-  const transaction = db.transaction(["notes"], "readwrite");
-
-  transaction.oncomplete = (e) => {
-    console.log(`Data added to the ${e.target}`);
-  };
-  transaction.onerror = (e) => {
-    console.warn(
-      `an Error is preventing to add data in ${e.target} Error !!! -> ${e.target.error}`
-    );
-  };
-
-  const objectStore = transaction.objectStore("notes");
-  const request = objectStore.add(note);
-  request.onsuccess = (e) => {
-    console.log(`${e.target.result} data added successfully`);
+  const request = objectStore.add(objData);
+  request.oncomplete = (e) => {
+    console.log(`data added to database`);
   };
 }
 
-//
-function saveNote(event) {
-  if (!(titleInput.value.length && textInput.value.length)) return;
-  console.log(`${event.target.innerHTML} button clicked`);
+saveNoteBtn.addEventListener("click", () => {
+  const title = titleInput.value;
+  const text = textInput.value;
+  if (!(title?.length && text?.length)) return;
 
-  const noteObj = {};
-  noteObj.id = idGenerator();
-  noteObj.title = titleInput.value;
-  noteObj.text = textInput.value;
+  const cardObj = {
+    title: title,
+    text: text,
+  };
+  addData(cardObj);
+  clearInputFields();
+});
 
-  addData(noteObj);
+function clearInputFields() {
+  titleInput.value = "";
+  textInput.value = "";
 }
 
-////////////////////////  Side Functions  /////////////////////////////////
-function onetime() {
-  const ids = [];
-  let idCount = 0;
+// function populateCards() {
+//   const db = await getDataBase();
+//   const objectStore = db.transaction("cards").objectStore("cards")
+//   const request = objectStore.get("cards")
 
-  function idGenerator() {
-    ids.push(idCount++);
-    return idCount;
-  }
-  return idGenerator;
-}
+//   request.onerror = e => {
+//     console.log(`error !!! ${e.target.error}`,);
+//   }
+
+//   request.onsuccess = e => {
+//     console.log(`all cards are`,e.target.result)
+//   }
+// }
+
+// async function getCardFromDatabase(index) {
+//   const db = await getDataBase();
+//   const txn = db.transaction("cards");
+//   const objectStore = txn.objectStore("cards");
+//   const request = objectStore.get(index);
+
+//   request.onerror = (e) => {
+//     console.log(`error!!! ${e.target.error}`);
+//   };
+
+//   request.onsuccess = (e) => {
+//     console.log(`card of index ${index} is `, e.target.result);
+//   };
+// }
