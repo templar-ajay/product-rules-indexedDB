@@ -1,9 +1,38 @@
 const masterProductInput = document.querySelector("#masterProductInput");
 const childProductsInput = document.querySelector("#childProductsInput");
+const availabilityInput = document.querySelector("#availability");
 
 const saveRuleBtn = document.querySelector("#saveRuleBtn");
 const discardRuleBtn = document.querySelector("#discardRuleBtn");
 
+const db = await openDB();
+
+////////////////////////////////////variable declarations////////////////////////////////////////
+
+saveRuleBtn.addEventListener("click", () => {
+  const masterProduct = masterProductInput.value;
+  const available = availabilityInput.checked;
+  const childProducts = childProductsInput.value
+    .split(",")
+    .map((item) => item.trim());
+  const numberOfChildProducts = childProducts.length;
+
+  const data = {
+    master: masterProduct,
+    childProducts: childProducts,
+    available: available,
+    numberOfChildProducts: numberOfChildProducts,
+  };
+
+  addData(data);
+  clearInputs();
+});
+
+discardRuleBtn.addEventListener("click", () => {
+  clearInputs();
+});
+
+//////////////////////////////////////function declarations//////////////////////////////////////
 function openDB() {
   return new Promise((resolve) => {
     const request = indexedDB.open("ProductRules", 1);
@@ -24,8 +53,6 @@ function openDB() {
   });
 }
 
-const db = await openDB();
-
 async function addData(data) {
   if (!db) db = await openDB();
   const objectStore = db
@@ -41,29 +68,28 @@ async function addData(data) {
   };
 }
 
-// adding data to the database
-const data = {
-  master: "apple-watch",
-  id: 1,
-  childProducts: ["shoes Nike", "iPhone13proMax", "Race Bike"],
-};
-const data2 = {
-  master: "apple-watch2",
-  id: 1,
-  childProducts: ["shoes Nike", "iPhone13proMax", "Race Bike"],
-};
-const data3 = {
-  master: "apple-watch3",
-  id: 1,
-  childProducts: ["shoes Nike", "iPhone13proMax", "Race Bike"],
-};
-addData(data);
-addData(data2);
-addData(data3);
+// // adding data to the database
+// const data = {
+//   master: "apple-watch",
+//   id: 1,
+//   childProducts: ["shoes Nike", "iPhone13proMax", "Race Bike"],
+// };
+// const data2 = {
+//   master: "apple-watch2",
+//   id: 1,
+//   childProducts: ["shoes Nike", "iPhone13proMax", "Race Bike"],
+// };
+// const data3 = {
+//   master: "apple-watch3",
+//   id: 1,
+//   childProducts: ["shoes Nike", "iPhone13proMax", "Race Bike"],
+// };
 
 //read data
 
-async function showCards() {
+// const data = await readData(); // It works
+// console.log(`data`, data);
+async function readData() {
   if (!db) db = await openDB();
 
   const objectStore = db
@@ -78,14 +104,16 @@ async function showCards() {
   // const request = objectStore.getAllKeys();
   const request = objectStore.openCursor();
 
+  const arr = [];
   request.onsuccess = (e) => {
     const cursor = request.result || e.target.result;
     if (cursor) {
       console.log(`Requested data is `, e.target.result);
-
+      arr.push(e.target.result.value);
       cursor.continue();
     } else {
       console.log(`all entries displayed`);
+      console.log(`arr`, arr);
     }
   };
 
@@ -96,8 +124,8 @@ async function showCards() {
   request.onerror = (e) => {
     console.log(`Error!! ${e.target.error}`);
   };
+  return arr;
 }
-showCards();
 
 // updating data
 async function updateData(keyPath, key, value) {
@@ -128,8 +156,6 @@ async function updateData(keyPath, key, value) {
   };
 }
 
-updateData("apple-watch", "id", 1);
-
 // deleting data
 
 async function deleteData(data) {
@@ -153,4 +179,11 @@ async function deleteData(data) {
     console.log(`all entries displayed`);
   };
 }
-deleteData("apple-watch");
+
+function clearInputs() {
+  masterProductInput.value = "";
+  childProductsInput.value = "";
+  availabilityInput.removeAttribute("checked");
+}
+
+function renderCards() {}
