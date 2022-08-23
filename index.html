@@ -46,7 +46,7 @@
               ></textarea>
               <label for="childProductsInput">Child Products</label>
             </div>
-            <button id="saveRuleBtn" type="button" class="btn btn-primary mt-2">
+            <button id="saveRuleBtn" type="button" class="btn btn-success mt-2">
               Save Rule
             </button>
             <button
@@ -62,6 +62,86 @@
       <div id="cardsContainer" class="container my-5 d-flex flex-wrap"></div>
     </div>
   </body>
+
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="staticBackdrop"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false"
+    tabindex="-1"
+    aria-labelledby="staticBackdropLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">Edit Rule</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="card">
+            <div class="card-body">
+              <div class="form-floating mb-3">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editMasterProductInput"
+                  placeholder="name@example.com"
+                  disabled
+                />
+                <label for="editMasterProductInput">Master Product</label>
+              </div>
+              <div class="form-check form-check-inline mb-2">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="editAvailability"
+                  value="Availability"
+                />
+                <label class="form-check-label" for="editAvailability"
+                  >Available</label
+                >
+              </div>
+              <div class="form-floating">
+                <textarea
+                  class="form-control"
+                  placeholder="Enter Child Products here"
+                  id="editChildProductsInput"
+                  style="height: 100px"
+                ></textarea>
+                <label for="editChildProductsInput">Child Products</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+            id="dismissRule"
+          >
+            Dismiss
+          </button>
+          <button
+            data-bs-dismiss="modal"
+            type="button"
+            id="updateRule"
+            class="btn btn-primary"
+          >
+            Update Rule
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="script.js" type="module"></script>
   <!-- JavaScript Bundle with Popper -->
   <script
